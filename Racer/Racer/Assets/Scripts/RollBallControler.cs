@@ -9,8 +9,10 @@ public class RollBallControler : MonoBehaviour {
     public float localGravity;
     public float forceMultiplier;
     public float rotateMultiplier;
-    private float instantRotateMultiplier;
-    private float instantForceMultiplier;
+    public bool sliding;
+    private float slidingDampening;
+
+    private Vector3 slidingDir;
 
     // Use this for initialization
     void Start () {
@@ -24,32 +26,22 @@ public class RollBallControler : MonoBehaviour {
 
         if(MoveFoward())
         {
-            rb.AddRelativeForce(Vector3.forward * instantForceMultiplier);
+            rb.AddRelativeForce(Vector3.forward * forceMultiplier);
         }
         if (MoveBackwards())
         {
-            rb.AddRelativeForce(Vector3.back * instantForceMultiplier);
+            rb.AddRelativeForce(Vector3.back * forceMultiplier);
         }
         if (RotateLeft())
         {
-            rb.AddRelativeTorque(Vector3.down * instantRotateMultiplier);
+            rb.AddRelativeTorque(Vector3.down * rotateMultiplier * slidingDampening);
         }
         if (RotateRight())
         {
-            rb.AddRelativeTorque(Vector3.up * instantRotateMultiplier);
+            rb.AddRelativeTorque(Vector3.up * rotateMultiplier * slidingDampening);
         }
-        if (Slide())
-        {
-            rb.drag = 1;
-            instantRotateMultiplier = rotateMultiplier * 2;
-            instantForceMultiplier = forceMultiplier / 2;
-        }
-        else
-        {
-            rb.drag = 2;
-            instantRotateMultiplier = rotateMultiplier;
-            instantForceMultiplier = forceMultiplier;
-        }
+
+        SlideCheck();
     }
 
     bool MoveFoward ()
@@ -81,12 +73,33 @@ public class RollBallControler : MonoBehaviour {
             return false;
     }
 
-    bool Slide()
+    void SlideCheck()
     {
         if (Input.GetKey(KeyCode.Space))
-            return true;
+        {
+            if (RotateLeft() && !sliding)
+            {
+                sliding = true;
+                slidingDir = (Vector3.down);
+            }
+            if (RotateRight() && !sliding)
+            {
+                sliding = true;
+                slidingDir = (Vector3.up);
+            }
+        }
         else
-            return false;
+        {
+            slidingDampening = 1;
+            sliding = false;
+        }
+
+        if (sliding)
+        {
+            slidingDampening = .8f;
+            rb.AddRelativeTorque(slidingDir * rotateMultiplier);
+        }
+
     }
 
 }

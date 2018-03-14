@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/CenaCarroBola.unity
+- path: Assets/Scenes/CenaCarroBola.unity
   isLoaded: 1
   isActive: 1
